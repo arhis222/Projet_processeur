@@ -1,0 +1,32 @@
+module "procfin"
+inputs
+   BusDonEntInt : int;
+   reset : bool;
+outputs
+   BusAdInt : int;
+   BusDonSortInt : int;
+   write : bool;
+   iACC : int;
+   iRI1 : int;
+   iRI2 : int;
+   iPC : int;
+   Etat_0 : bool;
+   Etat_1 : bool;
+   Etat_2 : bool;
+   Etat_3 : bool;
+   Etat_4 : bool;
+   Etat_5 : bool;
+   Etat_6 : bool;
+panels
+   inpanel = col { $BusDonEntInt $reset
+   };
+   outpanel = col {
+      line { $BusAdInt $BusDonSortInt $write
+      }
+      line { $iRI2 $iPC $iACC $iRI1
+      }
+      line { $Etat_0 $Etat_1 $Etat_2 $Etat_3 $Etat_4 $Etat_5 $Etat_6
+      }
+   };
+   top = line { $inpanel $outpanel
+   };

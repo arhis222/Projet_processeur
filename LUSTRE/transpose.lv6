@@ -1,0 +1,31 @@
+
+
+node transpose<<const n:int; const m:int; type t>>(x:t^n^m) returns (y:t^m^n);
+let
+    -- avec une facon de parler du tableau vide, je pourrais m'arreter
+    -- a 0 et rendre vide^m ici. []^m fonctionne ? non, mais il pourrait.
+  y =
+--  with n = 0 then []
+  with n = 1 then 
+     map<<array_to_scal<<m,t>>,m,t>>(x)
+--map<<array_to_scal<<m,t>>,m,t>>(x)
+
+  else
+     map<< ajoute_debut<<m,t>>, m, t >>(x[0], transpose<<n-1,m,t>>(x[1..n]));
+tel
+
+-- utile ? 
+node array_to_scal<<const m:int; type t>>(x:t^m) returns (res:t);
+let
+  res = x[0];
+tel
+node ajoute_debut<<const m:int;  type t>>(x:t; y:t^n) returns (res:t^(n+1));
+let
+ res = [x]|y;
+tel
+
+
+node test_transpose(x:bool^3^2) returns (res:bool^2^3);
+let
+  res = transpose<<2,3,bool>>(x);
+tel
