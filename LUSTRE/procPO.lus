@@ -50,10 +50,12 @@ tel;
 ----RI101 : 2 bits de poids faible de RI1
 
 ----------------------------------------------------------------------------
-node processeurPO <<const n:int>> ( BusDonEnt: bool^n; SelBusOp11,SelBusOp10,SelBusOp2,SelBusAd,chRI1, chRI2, chPC,chACC,OpUAL1,OpUAL0,resetPC:bool)
-returns(BusDonSort: bool^n;BusAd: bool^n;RI101:bool^2;
+node processeurPO <<const n:int>> ( BusDonEnt: bool^n; SelBusOp11,SelBusOp10,SelBusOp2,SelBusAd,chRI1, chRI2, chPC,chACC,OpUAL1,OpUAL0,resetPC, chFlag:bool)
+returns(BusDonSort: bool^n;BusAd: bool^n;RI1012:bool^3; --RI101 était de type bool^2, mais maintenant il est de type bool^3 pour ajouter la soustraction.
+flagZ, flagN, flagV, flagC: bool;  -- <== sorties des bascules
 ---Pour visualiser les registres
 ACC, RI1, RI2, PC: bool^n
+
 );
 
 var
@@ -63,12 +65,28 @@ BusOp1,BusOp2:bool^n;
 BusRes:bool^n;
 --flags
 Z,N,C,V:bool;
+-- sorties intermédiaires pour la bascule
+Zl, Nl, Vl, Cl: bool;
 --registres
 --RI1,RI2,PC,ACC:bool^n;
 
 let
 
 (Z,N,V,C,BusRes)=ual_n_bits<<n>>(BusOp1,BusOp2,OpUAL1,OpUAL0);
+
+-- 4 bascules mémoire de flags :  
+--   ent=Z/N/V/C, char=chFlag, reset=resetPC, set=false
+Zl = bascule(Z , chFlag, resetPC, false);
+Nl = bascule(N , chFlag, resetPC, false);
+Vl = bascule(V , chFlag, resetPC, false);
+Cl = bascule(C , chFlag, resetPC, false);
+
+flagZ = Zl;
+flagN = Nl;
+flagV = Vl;
+flagC = Cl;
+
+
 -- Selection du Bus Operande 1: 00: RI2, 01: PC, 10 : ACC
 BusOp1=mux41<<n>>(RI2,PC,ACC,false^n,SelBusOp11,SelBusOp10);
 
@@ -88,8 +106,9 @@ RI2= registren<<n>>(BusDonEnt,chRI2);
 --le bus de donnee en sortie, toujours égal à ACC
 BusDonSort= ACC;
 
---les deux bits de poids faible de RI1
-RI101=[RI1[0],RI1[1]];
+--MODIF
+-- trois bits de code d'instruction (poids faible, 2 et 1)
+RI1012=[RI1[0],RI1[1],RI1[2]]; 
 
 tel;
 
