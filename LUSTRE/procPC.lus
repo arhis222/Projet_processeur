@@ -44,38 +44,48 @@ include "memoire.lus"
 -------SelBusOp11,SelBusOp10=0,0
 
 ----------------------------------------------------------------------------
-node processeurPC  (reset:bool; RI1012:bool^3) -- MODIF avant c'était RI101:bool^2
+node processeurPC  (reset:bool; RI1012:bool^3; flagC, flagZ: bool) -- MODIF avant c'était RI101:bool^2
 returns(SelBusOp11,SelBusOp10,SelBusOp2,SelBusAd,chRI1, chRI2, chPC,chACC,OpUAL1,OpUAL0,resetPC, write, chFlag:bool;
 ----Pour le debug
-Etat:bool^8; -- MODIF : ajout d'un nouvel état.
+Etat:bool^9; -- MODIF : ajout de deux nouveaux états pour : l'un pour SUB l'autre pour BHI.
 );
 var
 --Etat:bool^7;
-EtatSuiv:bool^8; -- MODIF : ajout d'un nouvel état.
+EtatSuiv:bool^9; -- MODIF : ajout de deux nouveaux états pour : l'un pour SUB l'autre pour BHI.
 
 let
 -----Memorisation de l'etat courant
 Etat[0]=bascule(EtatSuiv[0],true,false,reset); --etat initial mise a 1 au moment du reset
-Etat[1..7]=map<<bascule,7>>(EtatSuiv[1..7],true^7,reset^7,false^7); --MODIF: ajout d'un nouvel état.
+Etat[1..8]=map<<bascule,8>>(EtatSuiv[1..8],true^8,reset^8,false^8); --MODIF: ajout d'un nouvel état.
 
 ------Calcul de l'etat suivant
 EtatSuiv[0]=false;
 -- retour au fetch1 après n'importe quel état de commande
-EtatSuiv[1]=Etat[0] or Etat[3] or Etat[4] or Etat[5] or Etat[6] or Etat[7]; -- MODIF : ajout d'un nouvel état.
+EtatSuiv[1]=Etat[0] or Etat[3] or Etat[4] or Etat[5] or Etat[6] or Etat[7] or (Etat[8] and not (flagC and not flagZ)); -- MODIF : ajout de deux nouveaux états pour : l'un pour SUB l'autre pour BHI : les états 7 et 8.
 EtatSuiv[2]=Etat[1];
 -- décode 2 bits pour LOAD/STORE/ADD
-EtatSuiv[3]=(not RI1012[0]) and (not RI1012[1]) and Etat[2]; --LOAD
-EtatSuiv[4]= RI1012[0] and (not RI1012[1]) and Etat[2]; --STORE
-EtatSuiv[5]=(not RI1012[0]) and  RI1012[1] and Etat[2]; --ADD
--- decode JUMP vs SUB selon 3eme bit.
-EtatSuiv[6]= RI1012[0] and  RI1012[1] and (not RI1012[2]) and Etat[2]; --JUMP
-EtatSuiv[7]= RI1012[0] and  RI1012[1] and  RI1012[2] and Etat[2]; --SUB
+-- LOAD
+EtatSuiv[3]=(not RI1012[0]) and (not RI1012[1]) and (not RI1012[2]) and Etat[2]; 
+-- STORE
+EtatSuiv[4]= RI1012[0] and (not RI1012[1]) and (not RI1012[2]) and Etat[2];
+-- ADD
+EtatSuiv[5]=(not RI1012[0]) and  RI1012[1] and (not RI1012[2]) and Etat[2]; 
+-- JUMP
+EtatSuiv[6]= (RI1012[0] and  RI1012[1] and (not RI1012[2]) and Etat[2]) or (Etat[8] and flagC and not flagZ); -- BHI sous condition.; 
+-- SUB
+EtatSuiv[7]= RI1012[0] and  RI1012[1] and  RI1012[2] and Etat[2];
+-- BHI
+EtatSuiv[8] = (not RI1012[0]) and  (not RI1012[1]) and  RI1012[2] and Etat[2]; 
 
 -------Calcul des sorties (commandes de la PO)
 ------Chargement des registres
 resetPC=Etat[0];
-chPC=Etat[1] or Etat[2] or Etat[6]; -- on n'incrémente pas le PC en SUB.
-chACC=Etat[3] or Etat[5] or Etat[7]; -- charger ACC pour ADD et SUB
+chPC=   Etat[1] 
+        or Etat[2] 
+        or Etat[6];  --JUMP
+        
+
+chACC=Etat[3] or Etat[5] or Etat[7]; -- LOAD, ADD, SUB
 
 -- nouveau : on mémorise les flags seulement lors d’une instruction de calcul
 chFlag = Etat[5] or Etat[7];               -- 5=ADD, 7=SUB
@@ -90,7 +100,7 @@ SelBusOp2=false; -- mém. pour ADD/SUB
 SelBusAd=Etat[1] or Etat[2];
 
 ------Operation UAL
-OpUAL1=Etat[3] or Etat[6] or Etat[7]; -- SUB active aussi bit1
+OpUAL1=Etat[3] or Etat[6] or Etat[7] or Etat[8]; -- SUB active aussi bit1, BHI passe op1 (= RI2))
 OpUAL0=Etat[1] or Etat[2] or Etat[7]; --SUB active aussi bit0
 
 -----Ecriture memoire

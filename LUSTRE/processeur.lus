@@ -20,22 +20,23 @@ include "procPC.lus"
 -------2: ADD ADR    ACC=ACC+MEM[ADR]
 -------3: JUMP ADR   PC= ADR   saut à l'adresse ADR
 ---####APRES
----Comme on a 6 operations maintenant d'après 6<2³ on aura besoin de 3 bits pour coder les instructions(1 bits pour le type d'instruction et 2 bits pour le code de l'instruction)
+---Comme on a 6 operations maintenant d'après 6<2³ on aura besoin de 3 bits pour coder les instructions.
 -------0: LOAD #VI   Chargement du registre ACC par la valeur VI
 -------1: STORE ADR  MEM[ADR]=ACC
--------2: jump ADR   PC= ADR   saut à l'adresse ADR
--------3: BHI ADR   PC= ADR   saut à l'adresse ADR si ACC>0
--------4: ADD ADR    ACC=ACC+MEM[ADR]
--------5: SUB ADR    ACC=ACC-MEM[ADR]
+-------2: ADD ADR    ACC=ACC+MEM[ADR]
+-------3: jump ADR   PC= ADR   saut à l'adresse ADR
+-------4: BHI ADR   PC= ADR   saut à l'adresse ADR si ACC>0
 
-
+-------7: SUB ADR    ACC=ACC-MEM[ADR]
 ---ADR ou VI sont dans le deuxieme mot de l'instruction
 ----------------------------------------------------------------------------
 node processeur <<const n:int>> ( BusDonEnt:bool^n; reset: bool)
-returns (BusDonSort,BusAd:bool^n; write:bool;
-ACC, RI1, RI2, PC: bool^n;
-flagZ,flagN,flagV,flagC:bool;  -- <== exposer les flags
-Etat:bool^8; -- MODIF : ajout d'un nouvel état.
+returns (
+    BusDonSort,BusAd    : bool^n; 
+    write:bool;
+    ACC, RI1, RI2, PC: bool^n;
+    flagZ, flagN, flagV, flagC : bool;  -- <== exposer les flags
+    Etat:bool^9; -- MODIF : ajout d'un nouvel état.
 );
 
 var
@@ -53,7 +54,7 @@ chFlag:bool;              -- déclaration du signal de chargement.
 
 let
 ---Partie controle
-(SelBusOp11,SelBusOp10,SelBusOp2,SelBusAd,chRI1, chRI2, chPC,chACC,OpUAL1,OpUAL0,resetPC, write, chFlag, Etat)=processeurPC (reset,RI1012);
+(SelBusOp11,SelBusOp10,SelBusOp2,SelBusAd,chRI1, chRI2, chPC,chACC,OpUAL1,OpUAL0,resetPC, write, chFlag, Etat)=processeurPC (reset,RI1012, flagC, flagZ);
 
 ---Partie operative
 (BusDonSort,BusAd,RI1012,fZ,fN,fV,fC,ACC, RI1, RI2, PC)=processeurPO<<n>>(BusDonEnt, SelBusOp11,SelBusOp10,SelBusOp2,SelBusAd,chRI1, chRI2, chPC,chACC,OpUAL1,OpUAL0,resetPC, chFlag);
@@ -77,16 +78,15 @@ node processeurint<<const n:int>> ( BusDonEntInt:int; reset:bool)
 returns (BusAdInt:int; BusDonSortInt:int; write:bool;
 iACC, iRI1, iRI2, iPC: int;
 flagZ,flagN,flagV,flagC:bool;
-Etat:bool^8; -- MODIF : ajout d'un nouvel état.
+Etat:bool^9; -- MODIF : ajout d'un nouvel état.
 );
 
 var BusAd,BusDonEnt,BusDonSort:bool^n;
-----pour le debug
 ACC, RI1, RI2, PC:bool^n;
 
 let
 BusDonEnt=entierbool<<n>>(BusDonEntInt);
-(BusDonSort,BusAd,write,ACC, RI1, RI2, PC,Etat)=processeur<<n>>(BusDonEnt,reset);
+(BusDonSort,BusAd,write,ACC, RI1, RI2, PC,flagZ, flagN, flagV, flagC, Etat)=processeur<<n>>(BusDonEnt,reset);
 BusAdInt= entiernat<<n>>(BusAd);
 BusDonSortInt= entiernat<<n>>(BusDonSort);
 

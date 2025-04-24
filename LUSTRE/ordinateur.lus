@@ -28,7 +28,7 @@ node ordinateur <<const n:int;const m:int>> (BusDon:int;Adress:int; InitMem, res
 returns (ContenuMem:int^n;write:bool;
 iACC, iRI1, iRI2, iPC: int;
 flagZ,flagN,flagV,flagC:bool;  -- <== exposer les flags
-Etat:bool^8; -- MODIF : ajout d'un nouvel état.
+Etat:bool^9; -- MODIF : ajout d'un nouvel état.
 );
 
 var
