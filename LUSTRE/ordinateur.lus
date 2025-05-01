@@ -27,7 +27,8 @@ include "ram.lus"
 node ordinateur <<const n:int;const m:int>> (BusDon:int;Adress:int; InitMem, reset: bool)
 returns (ContenuMem:int^n;write:bool;
 iACC, iRI1, iRI2, iPC: int;
-Etat:bool^7;
+flagZ,flagN,flagV,flagC:bool;  -- <== exposer les flags
+Etat:bool^9; -- MODIF : ajout d'un nouvel état.
 );
 
 var
@@ -49,7 +50,7 @@ donnee= mux21<<m>>(BusDonEntree,BusDonSort,InitMem);
 adresse=mux21<<m>>(BusAdresse,BusAd,InitMem);
 
 ---PROCESSEUR
-(BusDonSort,BusAd,write,ACC, RI1, RI2, PC,Etat)=processeur<<m>>(BusDonEnt,reset);
+(BusDonSort,BusAd,write,ACC, RI1, RI2, PC, flagZ, flagN, flagV, flagC, Etat)=processeur<<m>>(BusDonEnt,reset);
 
 ---MEMOIRE
 (BusDonEnt,sortreg)= memoire<<n,m,m>>(donnee,adresse,write or InitMem);
