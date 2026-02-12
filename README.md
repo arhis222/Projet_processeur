@@ -1,14 +1,14 @@
-# 🧠 Toy Processor Enhancement (ArM)
+# Toy Processor Enhancement (ArM)
 
 This project focuses on the modification and enhancement of a synchronous "toy" processor designed using the **Lustre** programming language. The objective was to extend the processor’s instruction set and improve its control logic, particularly for conditional execution and branching mechanisms.
 
 ---
 
-## 📌 Architecture Overview
+## Architecture Overview
 
 The processor follows a classical **Hardware/Software Co-design** approach, structured into two main parts:
 
-### 🔹 Operative Part (PO)
+### Operative Part (PO)
 The data path handles the storage and manipulation of data. It includes:
 * **Registers**: Accumulator (`ACC`), Program Counter (`PC`), and Instruction Registers (`RI1`, `RI2`).
 * **ALU (UAL)**: Responsible for arithmetic and logic operations.
@@ -17,27 +17,27 @@ The data path handles the storage and manipulation of data. It includes:
 
 
 
-### 🔹 Control Part (PC)
+### Control Part (PC)
 **Finite State Machine (FSM)** responsible for managing the processor's lifecycle:
 * **Sequencing**: Controlling the instruction fetch, decode, and execute cycles.
 * **Signal Generation**: Producing command signals for the PO based on decoded instructions and status flags.
 
 ---
 
-## 🛠️ Key Enhancements
+## Key Enhancements
 
-### 🔸 SUB Instruction
+### SUB Instruction
 Added support for the subtraction instruction:
 * **Command**: `SUB [Address]`
 * **Operation**: `ACC = ACC - Mem[Address]`
 * **Implementation**: Modified the `procPC.lus` automaton and `procPO.lus` data path to utilize the ALU's subtraction capability.
 
-### 🔸 Flag Memorization
+### Flag Memorization
 Four flip-flops were integrated to store status flags resulting from `ADD` or `SUB` operations:
 * **Flags**: `Z` (Zero), `N` (Negative), `V` (Overflow), and `C` (Carry).
 * **Logic**: Flags are updated only during calculation instructions and remain stable during other cycles, such as PC increments.
 
-### 🔸 Conditional Branching – BHI
+### Conditional Branching – BHI
 Introduced a new conditional branch instruction:
 * **Command**: `BHI label` (*Branch if Higher*)
 * **Condition**: Branches if `C AND NOT Z` is true.
@@ -45,7 +45,7 @@ Introduced a new conditional branch instruction:
 
 ---
 
-## ⚙️ Automaton & Control Logic
+## Automaton & Control Logic
 
 The Control Part utilizes an **11-state FSM** (States 0 through 10) to manage sequencing:
 * **State 0**: Initialization and PC reset.
@@ -56,7 +56,7 @@ The Control Part utilizes an **11-state FSM** (States 0 through 10) to manage se
 
 ---
 
-## 🚀 Testing & Validation
+## Testing & Validation
 
 Validation was performed using the **Luciole simulator**The following test program was used to verify arithmetic and branching:
 
@@ -70,7 +70,7 @@ Simulation results confirmed correct flag capture (e.g., `FlagC` activation) and
 
 ---
 
-## 📂 Project Structure
+## Project Structure
 
 * `procPO.lus`: Implementation of the Operative Part (Registers, Mux, Flags).
 * `procPC.lus`: Implementation of the Control Part (FSM and Automaton logic).
@@ -78,14 +78,12 @@ Simulation results confirmed correct flag capture (e.g., `FlagC` activation) and
 
 ---
 
-## 👥 Authors
-
-* **Utku GEMICIOGLU**
+## Author
 * **Arhan UNAY**
 
 ---
 
-### 🎓 Academic Context
+### Academic Context
 
 Developed as part of the **INFO3 – Architecture Matérielle (ArM)** course  
 Polytech Grenoble – April 2025
